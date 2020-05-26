@@ -5,6 +5,8 @@ const core = require('@actions/core')
 const exec = require('@actions/exec')
 const cache = require('@actions/tool-cache')
 
+const log = require('./util/log')
+
 const INPUTS = {
   jdk: 'jdk'
 }
@@ -17,11 +19,11 @@ const EXPORTS = {
   try {
     const requestedJavaDistribution = core.getInput(INPUTS.jdk)
 
-    core.info(`Requested distribution is: ${requestedJavaDistribution}`)
+    log.info(`Requested distribution is: ${requestedJavaDistribution}`)
 
     const javaDirectory = await installJava(requestedJavaDistribution)
 
-    core.info(`Local path to the distribution is: ${javaDirectory}`)
+    log.info(`Local path to the distribution is: ${javaDirectory}`)
 
     core.exportVariable(EXPORTS.JAVA_HOME, javaDirectory)
     core.addPath(path.join(javaDirectory, 'bin'))
@@ -34,17 +36,17 @@ async function installJava (distribution) {
   const cachedDirectory = cache.find('java', distribution)
 
   if (cachedDirectory) {
-    core.info('Distribution found in cache.')
+    log.info('Distribution found in cache.')
 
     return cachedDirectory
   } else {
-    core.info('Distribution not found in cache, downloading.')
+    log.info('Distribution not found in cache, downloading.')
 
     const javaHome = await retrieveWithJabba(distribution)
 
     await cache.cacheDir(javaHome, 'java', distribution)
 
-    core.info(`Cached directory "${javaHome}" for subsequent executions.`)
+    log.info(`Cached directory "${javaHome}" for subsequent executions.`)
 
     return javaHome
   }
@@ -53,11 +55,11 @@ async function installJava (distribution) {
 async function retrieveWithJabba (distributionExpression) {
   await installJabba()
 
-  core.info('Installed jabba.')
+  log.info('Installed jabba.')
 
   await downloadJava(distributionExpression)
 
-  core.info(`Downloaded distribution: ${distributionExpression}`)
+  log.info(`Downloaded distribution: ${distributionExpression}`)
 
   return await getPathToJabbaDownloadedJava(distributionExpression)
 }
@@ -75,7 +77,7 @@ async function downloadJava (distributionExpression) {
 async function getPathToJabbaDownloadedJava (distribution) {
   const distributionName = await runJabba('ls')
 
-  core.info(`Local name of distribution is: ${distributionName}`)
+  log.info(`Local name of distribution is: ${distributionName}`)
 
   return await runJabba('which', [distributionName])
 }
