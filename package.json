@@ -4,8 +4,8 @@
   "description": "Set up your GitHub Actions workflow with a specific version of Java via Jabba.",
   "main": "src/index.js",
   "scripts": {
-    "lint": "standard *.js",
-    "lint:fix": "standard --fix *.js",
+    "lint": "standard src/**/*.js",
+    "lint:fix": "standard --fix src/**/*.js",
     "package": "ncc build src/index.js -o dist"
   },
   "repository": {
