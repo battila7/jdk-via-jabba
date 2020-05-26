@@ -1,10 +1,9 @@
-const fs = require('fs')
 const path = require('path')
 
 const core = require('@actions/core')
-const exec = require('@actions/exec')
 const cache = require('@actions/tool-cache')
 
+const Jabba = require('./jabba')
 const log = require('./util/log')
 
 const INPUTS = {
@@ -42,7 +41,8 @@ async function installJava (distribution) {
   } else {
     log.info('Distribution not found in cache, downloading.')
 
-    const javaHome = await retrieveWithJabba(distribution)
+    const jabba = Jabba.create()
+    const javaHome = await jabba.retrieveDistribution(distribution)
 
     await cache.cacheDir(javaHome, 'java', distribution)
 
@@ -50,62 +50,4 @@ async function installJava (distribution) {
 
     return javaHome
   }
-}
-
-async function retrieveWithJabba (distributionExpression) {
-  await installJabba()
-
-  log.info('Installed jabba.')
-
-  await downloadJava(distributionExpression)
-
-  log.info(`Downloaded distribution: ${distributionExpression}`)
-
-  return await getPathToJabbaDownloadedJava(distributionExpression)
-}
-
-async function installJabba () {
-  const jabbaInstallerPath = await cache.downloadTool('https://github.com/shyiko/jabba/raw/master/install.sh')
-
-  await exec.exec('bash', [jabbaInstallerPath])
-}
-
-async function downloadJava (distributionExpression) {
-  await runJabba('install', [distributionExpression])
-}
-
-async function getPathToJabbaDownloadedJava (distribution) {
-  const distributionName = await runJabba('ls')
-
-  log.info(`Local name of distribution is: ${distributionName}`)
-
-  return await runJabba('which', [distributionName])
-}
-
-async function runJabba (command, args) {
-  const output = await execAndGrabStdout(jabbaPath(), [command, ...(args || [])])
-
-  return output.trim()
-}
-
-async function execAndGrabStdout (command, args, options) {
-  let output = ''
-
-  const listeners = {
-    stdout (data) {
-      output += data.toString()
-    }
-  }
-
-  const actualOptions = Object.assign({}, options, { listeners })
-
-  await exec.exec(command, args, actualOptions)
-
-  return output
-}
-
-function jabbaPath() {
-  const homeDirectory = process.env.HOME
-
-  return path.join(homeDirectory, '.jabba', 'bin', 'jabba')
 }
