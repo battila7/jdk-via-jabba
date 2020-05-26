@@ -17,4 +17,4 @@ jobs:
 
     - name: Run a multi-line script
       run: |
-        java --version
+        java -version
