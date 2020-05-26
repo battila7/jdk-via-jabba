@@ -1443,6 +1443,14 @@ const cache = __webpack_require__(533)
 const exec = __webpack_require__(183)
 const log = __webpack_require__(118)
 
+function isWindows () {
+  return process.platform === 'win32'
+}
+
+const platformDependentImpl = isWindows()
+  ? __webpack_require__(359)
+  : __webpack_require__(802)
+
 const Jabba = {
   _deps: {
     path,
@@ -1452,12 +1460,6 @@ const Jabba = {
   },
 
   Jabba () {
-    const platformDependentImpl = this.isWindows()
-      ? __webpack_require__(359)
-      : __webpack_require__(802)
-
-    Object.setPrototypeOf(this, platformDependentImpl)
-
     return this
   },
 
@@ -1489,12 +1491,10 @@ const Jabba = {
     const output = await this._deps.exec.execAndGrabStdout(this.jabbaPath(), [command, ...(args || [])])
 
     return output.trim()
-  },
-
-  isWindows () {
-    return this._deps.process.platform === 'win32'
   }
 }
+
+Object.setPrototypeOf(Jabba, platformDependentImpl)
 
 Jabba.create = function create () {
   return Object.create(Jabba).Jabba()
