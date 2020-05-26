@@ -34,7 +34,7 @@ module.exports =
 /******/ 	// the startup function
 /******/ 	function startup() {
 /******/ 		// Load entry module and return exports
-/******/ 		return __webpack_require__(104);
+/******/ 		return __webpack_require__(676);
 /******/ 	};
 /******/
 /******/ 	// run startup
@@ -1074,110 +1074,27 @@ module.exports = require("os");
 
 /***/ }),
 
-/***/ 104:
-/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
-
-const fs = __webpack_require__(747)
-const path = __webpack_require__(622)
+/***/ 118:
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 const core = __webpack_require__(470)
-const exec = __webpack_require__(986)
-const cache = __webpack_require__(533);
 
-(async function main () {
-  try {
-    const requestedJavaDistribution = core.getInput('java')
-
-    core.info(`Requested distribution is: ${requestedJavaDistribution}`)
-
-    const javaDirectory = await installJava(requestedJavaDistribution)
-
-    core.info(`Local path to the distribution is: ${javaDirectory}`)
-
-    core.exportVariable('JAVA_HOME', javaDirectory)
-    core.addPath(path.join(javaDirectory, 'bin'))
-  } catch (error) {
-    core.setFailed(error.message)
-  }
-})()
-
-async function installJava (distribution) {
-  const cachedDirectory = cache.find('java', distribution)
-
-  if (cachedDirectory) {
-    core.info('Distribution found in cache.')
-
-    return cachedDirectory
-  } else {
-    core.info('Distribution not found in cache, downloading.')
-
-    const javaHome = await retrieveWithJabba(distribution)
-
-    await cache.cacheDir(javaHome, 'java', distribution)
-
-    core.info(`Cached directory "${javaHome}" for subsequent executions.`)
-
-    return javaHome
+const log = {
+  debug (message) {
+    core.debug(message)
+  },
+  info (message) {
+    core.info(message)
+  },
+  warning (message) {
+    core.warning(message)
+  },
+  error (message) {
+    core.error(message)
   }
 }
 
-async function retrieveWithJabba (distributionExpression) {
-  await installJabba()
-
-  core.info('Installed jabba.')
-
-  await downloadJava(distributionExpression)
-
-  core.info(`Downloaded distribution: ${distributionExpression}`)
-
-  return await getPathToJabbaDownloadedJava(distributionExpression)
-}
-
-async function installJabba () {
-  const jabbaInstallerPath = await cache.downloadTool('https://github.com/shyiko/jabba/raw/master/install.sh')
-
-  await exec.exec('bash', [jabbaInstallerPath])
-}
-
-async function downloadJava (distributionExpression) {
-  await runJabba('install', [distributionExpression])
-}
-
-async function getPathToJabbaDownloadedJava (distribution) {
-  const distributionName = await runJabba('ls')
-
-  core.info(`Local name of distribution is: ${distributionName}`)
-
-  return await runJabba('which', [distributionName])
-}
-
-async function runJabba (command, args) {
-  const output = await execAndGrabStdout(jabbaPath(), [command, ...(args || [])])
-
-  return output.trim()
-}
-
-async function execAndGrabStdout (command, args, options) {
-  let output = ''
-
-  const listeners = {
-    stdout (data) {
-      output += data.toString()
-    }
-  }
-
-  const actualOptions = Object.assign({}, options, { listeners })
-
-  await exec.exec(command, args, actualOptions)
-
-  return output
-}
-
-function jabbaPath() {
-  const homeDirectory = process.env.HOME
-
-  return path.join(homeDirectory, '.jabba', 'bin', 'jabba')
-}
+module.exports = log
 
 
 /***/ }),
@@ -1476,6 +1393,39 @@ exports.debug = debug; // for test
 
 /***/ }),
 
+/***/ 183:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const actionsExec = __webpack_require__(986)
+
+async function exec (command, args, options) {
+  return await actionsExec.exec(command, args, options)
+}
+
+async function execAndGrabStdout (command, args, options) {
+  let output = ''
+
+  const listeners = {
+    stdout (data) {
+      output += data.toString()
+    }
+  }
+
+  const actualOptions = Object.assign({}, options, { listeners })
+
+  await actionsExec.exec(command, args, actualOptions)
+
+  return output
+}
+
+module.exports = {
+  exec,
+  execAndGrabStdout
+}
+
+
+/***/ }),
+
 /***/ 211:
 /***/ (function(module) {
 
@@ -1483,10 +1433,90 @@ module.exports = require("https");
 
 /***/ }),
 
+/***/ 327:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const path = __webpack_require__(622)
+
+const cache = __webpack_require__(533)
+
+const exec = __webpack_require__(183)
+const log = __webpack_require__(118)
+
+const Jabba = {
+  _deps: {
+    path,
+    process,
+    cache,
+    exec
+  },
+
+  Jabba () {
+    const platformDependentImpl = this.isWindows()
+      ? __webpack_require__(359)
+      : __webpack_require__(802)
+
+    Object.setPrototypeOf(this, platformDependentImpl)
+
+    return this
+  },
+
+  async retrieveDistribution (distributionExpression) {
+    await this.installJabba()
+
+    log.info('Installed jabba.')
+
+    await this.installJava(distributionExpression)
+
+    log.info(`Installed distribution: ${distributionExpression}`)
+
+    return await this.getPathToJava()
+  },
+
+  async installJava (distributionExpression) {
+    await this.runJabba('install', [distributionExpression])
+  },
+
+  async getPathToJava () {
+    const distributionName = await this.runJabba('ls')
+
+    log.info(`Local name of distribution is: ${distributionName}`)
+
+    return await this.runJabba('which', [distributionName])
+  },
+
+  async runJabba (command, args) {
+    const output = await this._deps.exec.execAndGrabStdout(this.jabbaPath(), [command, ...(args || [])])
+
+    return output.trim()
+  },
+
+  isWindows () {
+    return this._deps.process.platform === 'win32'
+  }
+}
+
+Jabba.create = function create () {
+  return Object.create(Jabba).Jabba()
+}
+
+module.exports = Jabba
+
+
+/***/ }),
+
 /***/ 357:
 /***/ (function(module) {
 
 module.exports = require("assert");
+
+/***/ }),
+
+/***/ 359:
+/***/ (function() {
+
+throw new Error('Windows support is not implemented yet!')
+
 
 /***/ }),
 
@@ -4716,6 +4746,66 @@ function isUnixExecutable(stats) {
 
 /***/ }),
 
+/***/ 676:
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+const path = __webpack_require__(622)
+
+const core = __webpack_require__(470)
+const cache = __webpack_require__(533)
+
+const Jabba = __webpack_require__(327)
+const log = __webpack_require__(118)
+
+const INPUTS = {
+  jdk: 'jdk'
+}
+
+const EXPORTS = {
+  JAVA_HOME: 'JAVA_HOME'
+};
+
+(async function main () {
+  try {
+    const requestedJavaDistribution = core.getInput(INPUTS.jdk)
+
+    log.info(`Requested distribution is: ${requestedJavaDistribution}`)
+
+    const javaDirectory = await installJava(requestedJavaDistribution)
+
+    log.info(`Local path to the distribution is: ${javaDirectory}`)
+
+    core.exportVariable(EXPORTS.JAVA_HOME, javaDirectory)
+    core.addPath(path.join(javaDirectory, 'bin'))
+  } catch (error) {
+    core.setFailed(error.message)
+  }
+})()
+
+async function installJava (distribution) {
+  const cachedDirectory = cache.find('java', distribution)
+
+  if (cachedDirectory) {
+    log.info('Distribution found in cache.')
+
+    return cachedDirectory
+  } else {
+    log.info('Distribution not found in cache, downloading.')
+
+    const jabba = Jabba.create()
+    const javaHome = await jabba.retrieveDistribution(distribution)
+
+    await cache.cacheDir(javaHome, 'java', distribution)
+
+    log.info(`Cached directory "${javaHome}" for subsequent executions.`)
+
+    return javaHome
+  }
+}
+
+
+/***/ }),
+
 /***/ 722:
 /***/ (function(module) {
 
@@ -4758,6 +4848,31 @@ module.exports = require("fs");
 /***/ (function(module) {
 
 module.exports = require("stream");
+
+/***/ }),
+
+/***/ 802:
+/***/ (function(module) {
+
+async function installJabba () {
+  const jabbaInstallerPath = await this._deps.cache.downloadTool('https://github.com/shyiko/jabba/raw/master/install.sh')
+
+  await this._deps.exec.exec('bash', [jabbaInstallerPath])
+}
+
+function jabbaPath () {
+  const homeDirectory = this._deps.process.env.HOME
+
+  return this._deps.path.join(homeDirectory, '.jabba', 'bin', 'jabba')
+}
+
+const nixImpl = {
+  installJabba,
+  jabbaPath
+}
+
+module.exports = nixImpl
+
 
 /***/ }),
 

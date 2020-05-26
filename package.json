@@ -1,16 +1,16 @@
 {
-  "name": "setup-jabba",
+  "name": "jdk-via-jabba",
   "version": "1.0.0",
   "description": "Set up your GitHub Actions workflow with a specific version of Java via Jabba.",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "lint": "standard *.js",
-    "lint:fix": "standard --fix *.js",
-    "package": "ncc build index.js -o dist"
+    "lint": "standard src/**/*.js",
+    "lint:fix": "standard --fix src/**/*.js",
+    "package": "ncc build src/index.js -o dist"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/battila7/setup-jabba.git"
+    "url": "git+https://github.com/battila7/jdk-via-jabba.git"
   },
   "keywords": [
     "GitHub",
@@ -21,9 +21,9 @@
   "author": "Attila Bagossy",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/battila7/setup-jabba/issues"
+    "url": "https://github.com/battila7/jdk-via-jabba/issues"
   },
-  "homepage": "https://github.com/battila7/setup-jabba#readme",
+  "homepage": "https://github.com/battila7/jdk-via-jabba#readme",
   "dependencies": {
     "@actions/core": "1.1.1",
     "@actions/exec": "1.0.4",
