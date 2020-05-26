@@ -32,7 +32,13 @@ async function installJava (distribution) {
   } else {
     core.info('Distribution not found in cache, downloading.')
 
-    return await retrieveWithJabba(distribution)
+    const javaHome = await retrieveWithJabba(distribution)
+
+    await cache.cacheDir(javaHome, 'java', distribution)
+
+    core.info(`Cached directory "${javaHome}" for subsequent executions.`)
+
+    return javaHome
   }
 }
 
