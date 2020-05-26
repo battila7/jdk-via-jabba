@@ -1,4 +1,4 @@
-# JDK via JDK
+# JDK via Jabba
 
 GitHub Action to download and activate a JDK using [jabba](https://github.com/shyiko/jabba).
 
