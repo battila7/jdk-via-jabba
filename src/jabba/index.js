@@ -5,6 +5,14 @@ const cache = require('@actions/tool-cache')
 const exec = require('../util/exec')
 const log = require('../util/log')
 
+function isWindows () {
+  return process.platform === 'win32'
+}
+
+const platformDependentImpl = isWindows()
+  ? require('./windows')
+  : require('./nix')
+
 const Jabba = {
   _deps: {
     path,
@@ -14,12 +22,6 @@ const Jabba = {
   },
 
   Jabba () {
-    const platformDependentImpl = this.isWindows()
-      ? require('./windows')
-      : require('./nix')
-
-    Object.setPrototypeOf(this, platformDependentImpl)
-
     return this
   },
 
@@ -51,12 +53,10 @@ const Jabba = {
     const output = await this._deps.exec.execAndGrabStdout(this.jabbaPath(), [command, ...(args || [])])
 
     return output.trim()
-  },
-
-  isWindows () {
-    return this._deps.process.platform === 'win32'
   }
 }
+
+Object.setPrototypeOf(Jabba, platformDependentImpl)
 
 Jabba.create = function create () {
   return Object.create(Jabba).Jabba()
