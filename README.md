@@ -6,7 +6,7 @@ GitHub Action to download and activate a JDK using [jabba](https://github.com/sh
 
 ### jdk
 
-The JDK to install and active. You can use any expression accepted by [jabba](https://github.com/shyiko/jabba).
+The JDK to install and activate. You can use any expression accepted by [jabba](https://github.com/shyiko/jabba).
 
 Examples:
 
