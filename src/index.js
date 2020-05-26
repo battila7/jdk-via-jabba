@@ -3,11 +3,19 @@ const path = require('path')
 
 const core = require('@actions/core')
 const exec = require('@actions/exec')
-const cache = require('@actions/tool-cache');
+const cache = require('@actions/tool-cache')
+
+const INPUTS = {
+  jdk: 'jdk'
+}
+
+const EXPORTS = {
+  JAVA_HOME: 'JAVA_HOME'
+};
 
 (async function main () {
   try {
-    const requestedJavaDistribution = core.getInput('jdk')
+    const requestedJavaDistribution = core.getInput(INPUTS.jdk)
 
     core.info(`Requested distribution is: ${requestedJavaDistribution}`)
 
@@ -15,7 +23,7 @@ const cache = require('@actions/tool-cache');
 
     core.info(`Local path to the distribution is: ${javaDirectory}`)
 
-    core.exportVariable('JAVA_HOME', javaDirectory)
+    core.exportVariable(EXPORTS.JAVA_HOME, javaDirectory)
     core.addPath(path.join(javaDirectory, 'bin'))
   } catch (error) {
     core.setFailed(error.message)
