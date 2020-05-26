@@ -1,13 +1,9 @@
-name: 'Wait'
-description: 'Wait a designated number of milliseconds'
+name: 'Setup Jabba'
+description: 'Set up your GitHub Actions workflow with a specific version of Java via Jabba.'
 inputs:
-  milliseconds:  # id of input
-    description: 'number of milliseconds to wait'
+  java:
+    description: 'The JDK to install. See https://github.com/shyiko/jabba for available expressions.'
     required: true
-    default: '1000'
-outputs:
-  time: # output will be available to future steps 
-    description: 'The message to output'
 runs:
   using: 'node12'
   main: 'dist/index.js'
