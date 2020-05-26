@@ -7,7 +7,7 @@ const cache = require('@actions/tool-cache');
 
 (async function main () {
   try {
-    const requestedJavaDistribution = core.getInput('java')
+    const requestedJavaDistribution = core.getInput('jdk')
 
     core.info(`Requested distribution is: ${requestedJavaDistribution}`)
 

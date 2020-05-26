@@ -1,7 +1,7 @@
-name: 'Setup Jabba'
+name: 'JDK via Jabba'
 description: 'Set up your GitHub Actions workflow with a specific version of Java via Jabba.'
 inputs:
-  java:
+  jdk:
     description: 'The JDK to install. See https://github.com/shyiko/jabba for available expressions.'
     required: true
 runs:
