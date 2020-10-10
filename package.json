@@ -1,6 +1,6 @@
 {
   "name": "jdk-via-jabba",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Set up your GitHub Actions workflow with a specific version of Java via Jabba.",
   "main": "src/index.js",
   "scripts": {
