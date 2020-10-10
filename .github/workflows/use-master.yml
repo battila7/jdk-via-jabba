@@ -1,4 +1,4 @@
-name: CI
+name: Use Master
 
 on:
   push:
@@ -11,7 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
-    - uses: battila7/jdk-via-jabba@v1
+    - uses: battila7/jdk-via-jabba@master
       with:
         jdk: zulu@1.8.252
 
