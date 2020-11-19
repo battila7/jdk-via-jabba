@@ -5046,7 +5046,7 @@ const Jabba = {
 
     log.info(`Installed distribution: ${distributionExpression}`)
 
-    const distributionPath = this.getPathToJava()
+    const distributionPath = await this.getPathToJava()
 
     log.info('Distro path' + distributionPath)
 
