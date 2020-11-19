@@ -1,3 +1,5 @@
+const path = require('path')
+
 const core = require('@actions/core')
 const cache = require('@actions/tool-cache')
 
@@ -18,17 +20,14 @@ const INPUTS = {
     const javaHomeEnvironmentVariable = core.getInput(INPUTS.javaHomeEnvironmentVariable)
     log.info(`The path to the downloaded distribution will be accessible via ${javaHomeEnvironmentVariable}`)
 
-    const {
-      distributionPath,
-      binaryFolderPath
-    } = await installJava(requestedJavaDistribution)
+    const javaHome = await installJava(requestedJavaDistribution)
 
-    log.info(`Local path to the distribution is: ${distributionPath}`)
+    log.info(`Local path to the distribution is: ${javaHome}`)
 
-    core.exportVariable(javaHomeEnvironmentVariable, distributionPath)
+    core.exportVariable(javaHomeEnvironmentVariable, javaHome)
 
     if (shouldAddBinDirectoryToPath()) {
-      core.addPath(binaryFolderPath)
+      core.addPath(path.join(javaHome, 'bin'))
 
       log.info('Exposed the bin directory of the downloaded distribution.')
     }
@@ -48,19 +47,13 @@ async function installJava (distribution) {
     log.info('Distribution not found in cache, downloading.')
 
     const jabba = Jabba.create()
-    const {
-      distributionPath,
-      binaryFolderPath
-    } = await jabba.retrieveDistribution(distribution)
+    const javaHome = await jabba.retrieveDistribution(distribution)
 
-    await cache.cacheDir(distributionPath, 'java', distribution)
+    await cache.cacheDir(javaHome, 'java', distribution)
 
-    log.info(`Cached directory "${distributionPath}" for subsequent executions.`)
+    log.info(`Cached directory "${javaHome}" for subsequent executions.`)
 
-    return {
-      distributionPath,
-      binaryFolderPath
-    }
+    return javaHome
   }
 }
 

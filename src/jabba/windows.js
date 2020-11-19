@@ -20,14 +20,14 @@ function jabbaPath () {
   return this._deps.path.join(homeDirectory, '.jabba', 'bin', 'jabba')
 }
 
-function binDirectory (javaPath) {
-  return this._deps.path.join(javaPath, 'bin')
+function actualHomeDirectory (downloadFolder) {
+  return downloadFolder
 }
 
 const windowsImpl = {
   installJabba,
   jabbaPath,
-  binDirectory
+  actualHomeDirectory
 }
 
 module.exports = windowsImpl

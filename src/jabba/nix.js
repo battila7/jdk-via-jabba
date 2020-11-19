@@ -10,14 +10,14 @@ function jabbaPath () {
   return this._deps.path.join(homeDirectory, '.jabba', 'bin', 'jabba')
 }
 
-function binDirectory (javaPath) {
-  return this._deps.path.join(javaPath, 'bin')
+function actualHomeDirectory (downloadFolder) {
+  return downloadFolder
 }
 
 const nixImpl = {
   installJabba,
   jabbaPath,
-  binDirectory
+  actualHomeDirectory
 }
 
 module.exports = nixImpl

@@ -4930,6 +4930,8 @@ module.exports = v4;
 /***/ 800:
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
+const path = __webpack_require__(622)
+
 const core = __webpack_require__(374)
 const cache = __webpack_require__(774)
 
@@ -4950,17 +4952,14 @@ const INPUTS = {
     const javaHomeEnvironmentVariable = core.getInput(INPUTS.javaHomeEnvironmentVariable)
     log.info(`The path to the downloaded distribution will be accessible via ${javaHomeEnvironmentVariable}`)
 
-    const {
-      distributionPath,
-      binaryFolderPath
-    } = await installJava(requestedJavaDistribution)
+    const javaHome = await installJava(requestedJavaDistribution)
 
-    log.info(`Local path to the distribution is: ${distributionPath}`)
+    log.info(`Local path to the distribution is: ${javaHome}`)
 
-    core.exportVariable(javaHomeEnvironmentVariable, distributionPath)
+    core.exportVariable(javaHomeEnvironmentVariable, javaHome)
 
     if (shouldAddBinDirectoryToPath()) {
-      core.addPath(binaryFolderPath)
+      core.addPath(path.join(javaHome, 'bin'))
 
       log.info('Exposed the bin directory of the downloaded distribution.')
     }
@@ -4980,19 +4979,13 @@ async function installJava (distribution) {
     log.info('Distribution not found in cache, downloading.')
 
     const jabba = Jabba.create()
-    const {
-      distributionPath,
-      binaryFolderPath
-    } = await jabba.retrieveDistribution(distribution)
+    const javaHome = await jabba.retrieveDistribution(distribution)
 
-    await cache.cacheDir(distributionPath, 'java', distribution)
+    await cache.cacheDir(javaHome, 'java', distribution)
 
-    log.info(`Cached directory "${distributionPath}" for subsequent executions.`)
+    log.info(`Cached directory "${javaHome}" for subsequent executions.`)
 
-    return {
-      distributionPath,
-      binaryFolderPath
-    }
+    return javaHome
   }
 }
 
@@ -5046,18 +5039,9 @@ const Jabba = {
 
     log.info(`Installed distribution: ${distributionExpression}`)
 
-    const distributionPath = await this.getPathToJava()
+    const javaHome = this.actualHomeDirectory(await this.getPathToJava())
 
-    log.info('Distro path' + distributionPath)
-
-    const binaryFolderPath = this.binDirectory(distributionPath)
-
-    log.info('Path to binary folder is ' + binaryFolderPath)
-
-    return {
-      distributionPath,
-      binaryFolderPath
-    }
+    return javaHome
   },
 
   async installJava (distributionExpression) {
@@ -5105,17 +5089,17 @@ function jabbaPath () {
   return this._deps.path.join(homeDirectory, '.jabba', 'bin', 'jabba')
 }
 
-function binDirectory (javaPath) {
-  return this._deps.path.join(javaPath, 'Home', 'Contents')
+function actualHomeDirectory (downloadFolder) {
+  return this._deps.path.join(downloadFolder, 'Contents', 'Home')
 }
 
-const nixImpl = {
+const macosImpl = {
   installJabba,
   jabbaPath,
-  binDirectory
+  actualHomeDirectory
 }
 
-module.exports = nixImpl
+module.exports = macosImpl
 
 
 /***/ }),
@@ -5135,14 +5119,14 @@ function jabbaPath () {
   return this._deps.path.join(homeDirectory, '.jabba', 'bin', 'jabba')
 }
 
-function binDirectory (javaPath) {
-  return this._deps.path.join(javaPath, 'bin')
+function actualHomeDirectory (downloadFolder) {
+  return downloadFolder
 }
 
 const nixImpl = {
   installJabba,
   jabbaPath,
-  binDirectory
+  actualHomeDirectory
 }
 
 module.exports = nixImpl
@@ -5175,14 +5159,14 @@ function jabbaPath () {
   return this._deps.path.join(homeDirectory, '.jabba', 'bin', 'jabba')
 }
 
-function binDirectory (javaPath) {
-  return this._deps.path.join(javaPath, 'bin')
+function actualHomeDirectory (downloadFolder) {
+  return downloadFolder
 }
 
 const windowsImpl = {
   installJabba,
   jabbaPath,
-  binDirectory
+  actualHomeDirectory
 }
 
 module.exports = windowsImpl

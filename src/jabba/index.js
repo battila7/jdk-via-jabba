@@ -36,18 +36,9 @@ const Jabba = {
 
     log.info(`Installed distribution: ${distributionExpression}`)
 
-    const distributionPath = await this.getPathToJava()
+    const javaHome = this.actualHomeDirectory(await this.getPathToJava())
 
-    log.info('Distro path' + distributionPath)
-
-    const binaryFolderPath = this.binDirectory(distributionPath)
-
-    log.info('Path to binary folder is ' + binaryFolderPath)
-
-    return {
-      distributionPath,
-      binaryFolderPath
-    }
+    return javaHome
   },
 
   async installJava (distributionExpression) {

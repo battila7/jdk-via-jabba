@@ -10,14 +10,14 @@ function jabbaPath () {
   return this._deps.path.join(homeDirectory, '.jabba', 'bin', 'jabba')
 }
 
-function binDirectory (javaPath) {
-  return this._deps.path.join(javaPath, 'Home', 'Contents')
+function actualHomeDirectory (downloadFolder) {
+  return this._deps.path.join(downloadFolder, 'Contents', 'Home')
 }
 
-const nixImpl = {
+const macosImpl = {
   installJabba,
   jabbaPath,
-  binDirectory
+  actualHomeDirectory
 }
 
-module.exports = nixImpl
+module.exports = macosImpl
