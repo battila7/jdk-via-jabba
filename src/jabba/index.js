@@ -5,13 +5,15 @@ const cache = require('@actions/tool-cache')
 const exec = require('../util/exec')
 const log = require('../util/log')
 
-function isWindows () {
-  return process.platform === 'win32'
-}
-
-const platformDependentImpl = isWindows()
-  ? require('./windows')
-  : require('./nix')
+const platformDependentImpl = (function chooseImpl () {
+  if (process.platform === 'win32') {
+    return require('./windows')
+  } else if (process.platform === 'darwin') {
+    return require('./macos')
+  } else {
+    return require('./nix')
+  }
+})()
 
 const Jabba = {
   _deps: {
@@ -34,7 +36,13 @@ const Jabba = {
 
     log.info(`Installed distribution: ${distributionExpression}`)
 
-    return await this.getPathToJava()
+    const distributionPath = this.getPathToJava()
+    const binaryFolderPath = this.binDirectory(distributionPath)
+
+    return {
+      distributionPath,
+      binaryFolderPath
+    }
   },
 
   async installJava (distributionExpression) {

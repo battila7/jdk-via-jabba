@@ -11,7 +11,7 @@ function jabbaPath () {
 }
 
 function binDirectory (javaPath) {
-  return this._deps.path.join(javaPath, 'bin')
+  return this._deps.path.join(javaPath, 'Home', 'Contents')
 }
 
 const nixImpl = {
