@@ -4942,13 +4942,13 @@ const INPUTS = {
   jdk: 'jdk',
   javaHomeEnvironmentVariable: 'javaHomeEnvironmentVariable',
   addBinDirectoryToPath: 'addBinDirectoryToPath'
-}
+};
 
 (async function main () {
   try {
     const requestedJavaDistribution = core.getInput(INPUTS.jdk)
     log.info(`Requested distribution is: ${requestedJavaDistribution}`)
-    
+
     const javaHomeEnvironmentVariable = core.getInput(INPUTS.javaHomeEnvironmentVariable)
     log.info(`The path to the downloaded distribution will be accessible via ${javaHomeEnvironmentVariable}`)
 
@@ -4989,10 +4989,10 @@ async function installJava (distribution) {
   }
 }
 
-function shouldAddBinDirectoryToPath() {
-  const value = core.getInput(INPUTS.addBinDirectoryToPath);
+function shouldAddBinDirectoryToPath () {
+  const value = core.getInput(INPUTS.addBinDirectoryToPath)
 
-  return String(value).toLowerCase() == 'true'
+  return String(value).toLowerCase() === 'true'
 }
 
 
