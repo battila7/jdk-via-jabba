@@ -4939,25 +4939,30 @@ const Jabba = __webpack_require__(647)
 const log = __webpack_require__(744)
 
 const INPUTS = {
-  jdk: 'jdk'
+  jdk: 'jdk',
+  javaHomeEnvironmentVariable: 'javaHomeEnvironmentVariable',
+  addBinDirectoryToPath: 'addBinDirectoryToPath'
 }
-
-const EXPORTS = {
-  JAVA_HOME: 'JAVA_HOME'
-};
 
 (async function main () {
   try {
     const requestedJavaDistribution = core.getInput(INPUTS.jdk)
-
     log.info(`Requested distribution is: ${requestedJavaDistribution}`)
+    
+    const javaHomeEnvironmentVariable = core.getInput(INPUTS.javaHomeEnvironmentVariable)
+    log.info(`The path to the downloaded distribution will be accessible via ${javaHomeEnvironmentVariable}`)
 
     const javaDirectory = await installJava(requestedJavaDistribution)
 
     log.info(`Local path to the distribution is: ${javaDirectory}`)
 
-    core.exportVariable(EXPORTS.JAVA_HOME, javaDirectory)
-    core.addPath(path.join(javaDirectory, 'bin'))
+    core.exportVariable(javaHomeEnvironmentVariable, javaDirectory)
+
+    if (shouldAddBinDirectoryToPath()) {
+      core.addPath(path.join(javaDirectory, 'bin'))
+
+      log.info('Exposed the bin directory of the downloaded distribution.')
+    }
   } catch (error) {
     core.setFailed(error.message)
   }
@@ -4982,6 +4987,12 @@ async function installJava (distribution) {
 
     return javaHome
   }
+}
+
+function shouldAddBinDirectoryToPath() {
+  const value = core.getInput(INPUTS.addBinDirectoryToPath);
+
+  return String(value).toLowerCase() == 'true'
 }
 
 
