@@ -27,6 +27,9 @@ async function installJabba () {
 function jabbaPath () {
   const homeDirectory = require('os').homedir
 
+  log.info('homedir' + homeDirectory)
+
+
   const p = this._deps.path.join(homeDirectory, '.jabba', 'bin', 'jabba')
 
   log.info(p)
