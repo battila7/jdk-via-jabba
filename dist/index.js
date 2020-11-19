@@ -4930,8 +4930,6 @@ module.exports = v4;
 /***/ 800:
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
-const path = __webpack_require__(622)
-
 const core = __webpack_require__(374)
 const cache = __webpack_require__(774)
 
@@ -4952,14 +4950,17 @@ const INPUTS = {
     const javaHomeEnvironmentVariable = core.getInput(INPUTS.javaHomeEnvironmentVariable)
     log.info(`The path to the downloaded distribution will be accessible via ${javaHomeEnvironmentVariable}`)
 
-    const javaDirectory = await installJava(requestedJavaDistribution)
+    const {
+      distributionPath,
+      binaryFolderPath
+    } = await installJava(requestedJavaDistribution)
 
-    log.info(`Local path to the distribution is: ${javaDirectory}`)
+    log.info(`Local path to the distribution is: ${distributionPath}`)
 
-    core.exportVariable(javaHomeEnvironmentVariable, javaDirectory)
+    core.exportVariable(javaHomeEnvironmentVariable, distributionPath)
 
     if (shouldAddBinDirectoryToPath()) {
-      core.addPath(path.join(javaDirectory, 'bin'))
+      core.addPath(binaryFolderPath)
 
       log.info('Exposed the bin directory of the downloaded distribution.')
     }
@@ -4979,13 +4980,19 @@ async function installJava (distribution) {
     log.info('Distribution not found in cache, downloading.')
 
     const jabba = Jabba.create()
-    const javaHome = await jabba.retrieveDistribution(distribution)
+    const {
+      distributionPath,
+      binaryFolderPath
+    } = await jabba.retrieveDistribution(distribution)
 
-    await cache.cacheDir(javaHome, 'java', distribution)
+    await cache.cacheDir(distributionPath, 'java', distribution)
 
-    log.info(`Cached directory "${javaHome}" for subsequent executions.`)
+    log.info(`Cached directory "${distributionPath}" for subsequent executions.`)
 
-    return javaHome
+    return {
+      distributionPath,
+      binaryFolderPath
+    }
   }
 }
 
@@ -5008,13 +5015,15 @@ const cache = __webpack_require__(774)
 const exec = __webpack_require__(824)
 const log = __webpack_require__(744)
 
-function isWindows () {
-  return process.platform === 'win32'
-}
-
-const platformDependentImpl = isWindows()
-  ? __webpack_require__(941)
-  : __webpack_require__(537)
+const platformDependentImpl = (function chooseImpl () {
+  if (process.platform === 'win32') {
+    return __webpack_require__(941)
+  } else if (process.platform === 'darwin') {
+    return __webpack_require__(100)
+  } else {
+    return __webpack_require__(537)
+  }
+})()
 
 const Jabba = {
   _deps: {
@@ -5037,7 +5046,13 @@ const Jabba = {
 
     log.info(`Installed distribution: ${distributionExpression}`)
 
-    return await this.getPathToJava()
+    const distributionPath = this.getPathToJava()
+    const binaryFolderPath = this.binDirectory(distributionPath)
+
+    return {
+      distributionPath,
+      binaryFolderPath
+    }
   },
 
   async installJava (distributionExpression) {
@@ -5070,6 +5085,36 @@ module.exports = Jabba
 
 /***/ }),
 
+/***/ 100:
+/***/ ((module) => {
+
+async function installJabba () {
+  const jabbaInstallerPath = await this._deps.cache.downloadTool('https://github.com/shyiko/jabba/raw/master/install.sh')
+
+  await this._deps.exec.exec('bash', [jabbaInstallerPath])
+}
+
+function jabbaPath () {
+  const homeDirectory = this._deps.process.env.HOME
+
+  return this._deps.path.join(homeDirectory, '.jabba', 'bin', 'jabba')
+}
+
+function binDirectory (javaPath) {
+  return this._deps.path.join(javaPath, 'Home', 'Contents')
+}
+
+const nixImpl = {
+  installJabba,
+  jabbaPath,
+  binDirectory
+}
+
+module.exports = nixImpl
+
+
+/***/ }),
+
 /***/ 537:
 /***/ ((module) => {
 
@@ -5085,9 +5130,14 @@ function jabbaPath () {
   return this._deps.path.join(homeDirectory, '.jabba', 'bin', 'jabba')
 }
 
+function binDirectory (javaPath) {
+  return this._deps.path.join(javaPath, 'bin')
+}
+
 const nixImpl = {
   installJabba,
-  jabbaPath
+  jabbaPath,
+  binDirectory
 }
 
 module.exports = nixImpl
@@ -5120,9 +5170,14 @@ function jabbaPath () {
   return this._deps.path.join(homeDirectory, '.jabba', 'bin', 'jabba')
 }
 
+function binDirectory (javaPath) {
+  return this._deps.path.join(javaPath, 'bin')
+}
+
 const windowsImpl = {
   installJabba,
-  jabbaPath
+  jabbaPath,
+  binDirectory
 }
 
 module.exports = windowsImpl
