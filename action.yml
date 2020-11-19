@@ -4,6 +4,14 @@ inputs:
   jdk:
     description: 'The JDK to install. See https://github.com/shyiko/jabba for available expressions.'
     required: true
+  javaHomeEnvironmentVariable:
+    description: 'The target environment variable into which the path to the downloaded distribution will be saved.'
+    required: false
+    default: 'JAVA_HOME'
+  addBinDirectoryToPath:
+    description: 'Whether to add the bin directory of the downloaded distribution to the PATH.'
+    required: false
+    default: true
 runs:
   using: 'node12'
   main: 'dist/index.js'
