@@ -5047,6 +5047,9 @@ const Jabba = {
     log.info(`Installed distribution: ${distributionExpression}`)
 
     const distributionPath = this.getPathToJava()
+
+    log.info('Distro path' + distributionPath)
+
     const binaryFolderPath = this.binDirectory(distributionPath)
 
     log.info('Path to binary folder is ' + binaryFolderPath)
