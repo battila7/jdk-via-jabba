@@ -4952,14 +4952,14 @@ const INPUTS = {
     const javaHomeEnvironmentVariable = core.getInput(INPUTS.javaHomeEnvironmentVariable)
     log.info(`The path to the downloaded distribution will be accessible via ${javaHomeEnvironmentVariable}`)
 
-    const javaDirectory = await installJava(requestedJavaDistribution)
+    const javaHome = await installJava(requestedJavaDistribution)
 
-    log.info(`Local path to the distribution is: ${javaDirectory}`)
+    log.info(`Local path to the distribution is: ${javaHome}`)
 
-    core.exportVariable(javaHomeEnvironmentVariable, javaDirectory)
+    core.exportVariable(javaHomeEnvironmentVariable, javaHome)
 
     if (shouldAddBinDirectoryToPath()) {
-      core.addPath(path.join(javaDirectory, 'bin'))
+      core.addPath(path.join(javaHome, 'bin'))
 
       log.info('Exposed the bin directory of the downloaded distribution.')
     }
@@ -5008,13 +5008,15 @@ const cache = __webpack_require__(774)
 const exec = __webpack_require__(824)
 const log = __webpack_require__(744)
 
-function isWindows () {
-  return process.platform === 'win32'
-}
-
-const platformDependentImpl = isWindows()
-  ? __webpack_require__(941)
-  : __webpack_require__(537)
+const platformDependentImpl = (function chooseImpl () {
+  if (process.platform === 'win32') {
+    return __webpack_require__(941)
+  } else if (process.platform === 'darwin') {
+    return __webpack_require__(100)
+  } else {
+    return __webpack_require__(537)
+  }
+})()
 
 const Jabba = {
   _deps: {
@@ -5037,7 +5039,9 @@ const Jabba = {
 
     log.info(`Installed distribution: ${distributionExpression}`)
 
-    return await this.getPathToJava()
+    const javaHome = this.actualHomeDirectory(await this.getPathToJava())
+
+    return javaHome
   },
 
   async installJava (distributionExpression) {
@@ -5070,6 +5074,36 @@ module.exports = Jabba
 
 /***/ }),
 
+/***/ 100:
+/***/ ((module) => {
+
+async function installJabba () {
+  const jabbaInstallerPath = await this._deps.cache.downloadTool('https://github.com/shyiko/jabba/raw/master/install.sh')
+
+  await this._deps.exec.exec('bash', [jabbaInstallerPath])
+}
+
+function jabbaPath () {
+  const homeDirectory = this._deps.process.env.HOME
+
+  return this._deps.path.join(homeDirectory, '.jabba', 'bin', 'jabba')
+}
+
+function actualHomeDirectory (downloadFolder) {
+  return this._deps.path.join(downloadFolder, 'Contents', 'Home')
+}
+
+const macosImpl = {
+  installJabba,
+  jabbaPath,
+  actualHomeDirectory
+}
+
+module.exports = macosImpl
+
+
+/***/ }),
+
 /***/ 537:
 /***/ ((module) => {
 
@@ -5085,9 +5119,14 @@ function jabbaPath () {
   return this._deps.path.join(homeDirectory, '.jabba', 'bin', 'jabba')
 }
 
+function actualHomeDirectory (downloadFolder) {
+  return downloadFolder
+}
+
 const nixImpl = {
   installJabba,
-  jabbaPath
+  jabbaPath,
+  actualHomeDirectory
 }
 
 module.exports = nixImpl
@@ -5096,9 +5135,41 @@ module.exports = nixImpl
 /***/ }),
 
 /***/ 941:
-/***/ (() => {
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-throw new Error('Windows support is not implemented yet!')
+const { spawnSync } = __webpack_require__(129)
+
+const log = __webpack_require__(744)
+
+async function installJabba () {
+  const scriptPath = this._deps.path.join(__dirname, '..', 'install-jabba.ps1')
+
+  const { error, output } = spawnSync('powershell', [scriptPath])
+
+  log.info(output)
+
+  if (error) {
+    throw error
+  }
+}
+
+function jabbaPath () {
+  const homeDirectory = __webpack_require__(87).homedir()
+
+  return this._deps.path.join(homeDirectory, '.jabba', 'bin', 'jabba')
+}
+
+function actualHomeDirectory (downloadFolder) {
+  return downloadFolder
+}
+
+const windowsImpl = {
+  installJabba,
+  jabbaPath,
+  actualHomeDirectory
+}
+
+module.exports = windowsImpl
 
 
 /***/ }),
