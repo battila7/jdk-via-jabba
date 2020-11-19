@@ -11,7 +11,6 @@ Invoke-Expression (
 
 async function installJabba () {
   const { error } = spawnSync('powershell', {
-    stdio: 'inherit',
     input: installerScript
   })
 
