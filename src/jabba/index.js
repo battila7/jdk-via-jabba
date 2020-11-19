@@ -39,6 +39,8 @@ const Jabba = {
     const distributionPath = this.getPathToJava()
     const binaryFolderPath = this.binDirectory(distributionPath)
 
+    log.info('Path to binary folder is ' + binaryFolderPath)
+
     return {
       distributionPath,
       binaryFolderPath
