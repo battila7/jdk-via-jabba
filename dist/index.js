@@ -5096,24 +5096,18 @@ module.exports = nixImpl
 /***/ }),
 
 /***/ 941:
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
 const { spawnSync } = __webpack_require__(129)
 
-const installerUri = 'https://github.com/shyiko/jabba/raw/master/install.ps1'
+const log = __webpack_require__(744)
 
-const installerScript = `
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-Invoke-Expression (
-  Invoke-WebRequest ${installerUri} -UseBasicParsing
-).Content
-`.trim()
+const scriptPath = this._deps.path.join(__dirname, '..', 'install-jabba.ps1')
 
 async function installJabba () {
-  const { error } = spawnSync('powershell', {
-    stdio: 'inherit',
-    input: installerScript
-  })
+  const { error, output } = spawnSync('powershell', [scriptPath])
+
+  log.info(output)
 
   if (error) {
     throw error
@@ -5121,7 +5115,7 @@ async function installJabba () {
 }
 
 function jabbaPath () {
-  const homeDirectory = this._deps.process.env.HOME
+  const homeDirectory = __webpack_require__(87).homedir()
 
   return this._deps.path.join(homeDirectory, '.jabba', 'bin', 'jabba')
 }
