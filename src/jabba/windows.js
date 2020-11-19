@@ -2,9 +2,9 @@ const { spawnSync } = require('child_process')
 
 const log = require('../util/log')
 
-const scriptPath = this._deps.path.join(__dirname, '..', 'install-jabba.ps1')
-
 async function installJabba () {
+  const scriptPath = this._deps.path.join(__dirname, '..', 'install-jabba.ps1')
+
   const { error, output } = spawnSync('powershell', [scriptPath])
 
   log.info(output)

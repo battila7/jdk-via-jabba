@@ -5096,15 +5096,15 @@ module.exports = nixImpl
 /***/ }),
 
 /***/ 941:
-/***/ (function(module, __unused_webpack_exports, __webpack_require__) {
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 const { spawnSync } = __webpack_require__(129)
 
 const log = __webpack_require__(744)
 
-const scriptPath = this._deps.path.join(__dirname, '..', 'install-jabba.ps1')
-
 async function installJabba () {
+  const scriptPath = this._deps.path.join(__dirname, '..', 'install-jabba.ps1')
+
   const { error, output } = spawnSync('powershell', [scriptPath])
 
   log.info(output)
