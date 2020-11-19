@@ -5,7 +5,7 @@ on:
     branches: [ "#6-allow-installing-without-setting-the-java-home-environment-variable-test" ]
 
 jobs:
-  build:
+  use-with-default-settings:
     runs-on: ubuntu-latest
 
     steps:
@@ -15,6 +15,44 @@ jobs:
       with:
         jdk: zulu@1.8.252
 
-    - name: Run a multi-line script
+    - name: Test
       run: |
+        echo $JAVA_HOME
+        echo $PATH
         java -version
+
+  use-with-custom-java-home:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - uses: "./"
+      with:
+        jdk: zulu@1.8.252
+        javaHomeEnvironmentVariable: ZULU_HOME
+
+    - name: Test
+      run: |
+        echo $JAVA_HOME
+        echo $PATH
+        echo $ZULU_HOME
+        java -version
+
+  use-with-no-path:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - uses: "./"
+      with:
+        jdk: zulu@1.8.252
+        javaHomeEnvironmentVariable: ZULU_HOME
+        addBinDirectoryToPath: false
+
+    - name: Test
+      run: |
+        echo $JAVA_HOME
+        echo $PATH
+        echo $ZULU_HOME
