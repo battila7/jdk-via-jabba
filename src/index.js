@@ -20,14 +20,14 @@ const INPUTS = {
     const javaHomeEnvironmentVariable = core.getInput(INPUTS.javaHomeEnvironmentVariable)
     log.info(`The path to the downloaded distribution will be accessible via ${javaHomeEnvironmentVariable}`)
 
-    const javaDirectory = await installJava(requestedJavaDistribution)
+    const javaHome = await installJava(requestedJavaDistribution)
 
-    log.info(`Local path to the distribution is: ${javaDirectory}`)
+    log.info(`Local path to the distribution is: ${javaHome}`)
 
-    core.exportVariable(javaHomeEnvironmentVariable, javaDirectory)
+    core.exportVariable(javaHomeEnvironmentVariable, javaHome)
 
     if (shouldAddBinDirectoryToPath()) {
-      core.addPath(path.join(javaDirectory, 'bin'))
+      core.addPath(path.join(javaHome, 'bin'))
 
       log.info('Exposed the bin directory of the downloaded distribution.')
     }

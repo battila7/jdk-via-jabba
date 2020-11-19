@@ -11,13 +11,13 @@ function jabbaPath () {
 }
 
 function actualHomeDirectory (downloadFolder) {
-  return downloadFolder
+  return this._deps.path.join(downloadFolder, 'Contents', 'Home')
 }
 
-const nixImpl = {
+const macosImpl = {
   installJabba,
   jabbaPath,
   actualHomeDirectory
 }
 
-module.exports = nixImpl
+module.exports = macosImpl
