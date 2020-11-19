@@ -5111,12 +5111,7 @@ Invoke-Expression (
 ).Content`
 
 async function installJabba () {
-  const result = spawnSync('powershell', {
-    stdio: [
-      installerScript,
-      'inherit'
-    ]
-  })
+  const result = spawnSync('powershell', [this._deps.path.join(__dirname + '..' + 'install-jabba.ps1')])
 
   log.info(result.output)
 
