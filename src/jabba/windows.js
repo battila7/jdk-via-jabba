@@ -11,16 +11,18 @@ Invoke-Expression (
 ).Content`
 
 async function installJabba () {
-  const { error } = spawnSync('powershell', {
+  const result = spawnSync('powershell', {
     stdio: [
       installerScript,
       'inherit'
     ]
   })
 
-  if (error) {
-    log.info('Fail: ' + error.message)
-    throw error
+  log.info(result.output)
+
+  if (result.error) {
+    log.info('Fail: ' + result.error.message)
+    throw result.error
   }
 }
 
