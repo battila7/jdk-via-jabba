@@ -1,0 +1,61 @@
+name: Build Master
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  use-with-default-settings:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - uses: "./"
+      with:
+        jdk: zulu@1.8.252
+
+    - name: Print Java version
+      run: |
+        echo $JAVA_HOME
+        echo $PATH
+        java -version
+
+  use-with-custom-java-home-environment-variable:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - uses: "./"
+      with:
+        jdk: zulu@1.8.252
+        javaHomeEnvironmentVariable: ZULU_HOME
+
+    - name: Print Java version
+      run: |
+        echo $JAVA_HOME
+        echo $ZULU_HOME
+        echo $PATH
+        java -version
+
+  use-without-adding-to-path:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - uses: "./"
+      with:
+        jdk: zulu@1.8.252
+        javaHomeEnvironmentVariable: ZULU_HOME
+        addBinDirectoryToPath: false
+
+    - name: Print Java version
+      run: |
+        echo $JAVA_HOME
+        echo $ZULU_HOME
+        echo $PATH
+        java -version
