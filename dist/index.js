@@ -5102,19 +5102,24 @@ const { spawnSync } = __webpack_require__(129)
 
 const installerUri = 'https://github.com/shyiko/jabba/raw/master/install.ps1'
 
+const log = __webpack_require__(744)
+
 const installerScript = `
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 Invoke-Expression (
   Invoke-WebRequest ${installerUri} -UseBasicParsing
-).Content
-`.trim()
+).Content`
 
 async function installJabba () {
   const { error } = spawnSync('powershell', {
-    input: installerScript
+    stdio: [
+      installerScript,
+      'inherit'
+    ]
   })
 
   if (error) {
+    log.info('Fail: ' + error.message)
     throw error
   }
 }
@@ -5122,7 +5127,11 @@ async function installJabba () {
 function jabbaPath () {
   const homeDirectory = __webpack_require__(87).homedir
 
-  return this._deps.path.join(homeDirectory, '.jabba', 'bin', 'jabba')
+  const p = this._deps.path.join(homeDirectory, '.jabba', 'bin', 'jabba')
+
+  log.info(p)
+
+  return p
 }
 
 const windowsImpl = {

@@ -2,19 +2,24 @@ const { spawnSync } = require('child_process')
 
 const installerUri = 'https://github.com/shyiko/jabba/raw/master/install.ps1'
 
+const log = require('../util/log')
+
 const installerScript = `
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 Invoke-Expression (
   Invoke-WebRequest ${installerUri} -UseBasicParsing
-).Content
-`.trim()
+).Content`
 
 async function installJabba () {
   const { error } = spawnSync('powershell', {
-    input: installerScript
+    stdio: [
+      installerScript,
+      'inherit'
+    ]
   })
 
   if (error) {
+    log.info('Fail: ' + error.message)
     throw error
   }
 }
@@ -22,7 +27,11 @@ async function installJabba () {
 function jabbaPath () {
   const homeDirectory = require('os').homedir
 
-  return this._deps.path.join(homeDirectory, '.jabba', 'bin', 'jabba')
+  const p = this._deps.path.join(homeDirectory, '.jabba', 'bin', 'jabba')
+
+  log.info(p)
+
+  return p
 }
 
 const windowsImpl = {
