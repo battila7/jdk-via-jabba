@@ -2,13 +2,11 @@ name: Build Master
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    branches: [ "#6-windows-support-test" ]
 
 jobs:
   use-with-default-settings:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -19,12 +17,12 @@ jobs:
 
     - name: Print Java version
       run: |
-        echo $JAVA_HOME
-        echo $PATH
+        echo %JAVA_HOME%
+        echo %PATH%
         java -version
 
   use-with-custom-java-home-environment-variable:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -36,13 +34,13 @@ jobs:
 
     - name: Print Java version
       run: |
-        echo $JAVA_HOME
-        echo $ZULU_HOME
-        echo $PATH
+        echo %JAVA_HOME%
+        echo %ZULU_HOME%
+        echo %PATH%
         java -version
 
   use-without-adding-to-path:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -55,7 +53,7 @@ jobs:
 
     - name: Print Java version
       run: |
-        echo $JAVA_HOME
-        echo $ZULU_HOME
-        echo $PATH
+        echo %JAVA_HOME%
+        echo %ZULU_HOME%
+        echo %PATH%
         java -version
