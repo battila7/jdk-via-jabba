@@ -1,0 +1,20 @@
+name: Test
+
+on:
+  push:
+    branches: [ "#6-allow-installing-without-setting-the-java-home-environment-variable-test" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - uses: battila7/jdk-via-jabba@master
+      with:
+        jdk: zulu@1.8.252
+
+    - name: Run a multi-line script
+      run: |
+        java -version
