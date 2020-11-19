@@ -8,7 +8,11 @@ on:
 
 jobs:
   use-with-default-settings:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v2
@@ -22,9 +26,14 @@ jobs:
         echo $JAVA_HOME
         echo $PATH
         java -version
+      shell: bash
 
   use-with-custom-java-home-environment-variable:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v2
@@ -40,9 +49,14 @@ jobs:
         echo $ZULU_HOME
         echo $PATH
         java -version
+      shell: bash
 
   use-without-adding-to-path:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v2
@@ -59,3 +73,4 @@ jobs:
         echo $ZULU_HOME
         echo $PATH
         java -version
+      shell: bash
