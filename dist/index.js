@@ -5120,7 +5120,7 @@ async function installJabba () {
 }
 
 function jabbaPath () {
-  const homeDirectory = this._deps.process.env.HOME
+  const homeDirectory = __webpack_require__(87).homedir
 
   return this._deps.path.join(homeDirectory, '.jabba', 'bin', 'jabba')
 }
