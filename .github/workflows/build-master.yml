@@ -51,6 +51,35 @@ jobs:
         java -version
       shell: bash
 
+  use-with-custom-java-home-environment-variable:
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - uses: "./"
+      with:
+        jdk: zulu@1.8.252
+        javaHomeEnvironmentVariable: ZULU_HOME
+
+    - uses: "./"
+      with:
+        jdk: openjdk@1.11.0
+        javaHomeEnvironmentVariable: OJ11_HOME
+
+    - name: Print Java version
+      run: |
+        echo $JAVA_HOME
+        echo $ZULU_HOME
+        echo $OJ11_HOME
+        echo $PATH
+        java -version
+      shell: bash
+
   use-without-adding-to-path:
     strategy:
       matrix:
