@@ -51,7 +51,7 @@ jobs:
         java -version
       shell: bash
 
-  use-with-custom-java-home-environment-variable:
+  use-2-javas-with-custom-environment-variable:
     strategy:
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
