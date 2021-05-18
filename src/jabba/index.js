@@ -36,7 +36,7 @@ const Jabba = {
 
     log.info(`Installed distribution: ${distributionExpression}`)
 
-    const javaHome = this.actualHomeDirectory(await this.getPathToJava())
+    const javaHome = this.actualHomeDirectory(await this.getPathToJava(distributionExpression))
 
     return javaHome
   },
@@ -45,8 +45,8 @@ const Jabba = {
     await this.runJabba('install', [distributionExpression])
   },
 
-  async getPathToJava () {
-    const distributionName = await this.runJabba('ls')
+  async getPathToJava (distributionExpression) {
+    const distributionName = await this.runJabba('ls', [distributionExpression])
 
     log.info(`Local name of distribution is: ${distributionName}`)
 
