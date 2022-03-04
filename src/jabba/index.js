@@ -46,8 +46,14 @@ const Jabba = {
   },
 
   async getPathToJava (distributionExpression) {
-    log.info(`Listing distribution: ${distributionExpression}`)
-    const distributionName = await this.runJabba('ls', [distributionExpression])
+    let actualExpression = distributionExpression
+
+    if (distributionExpression.includes('+http')) {
+      actualExpression = distributionExpression.split('=')[0]
+    }
+
+    log.info(`Listing distribution ${actualExpression} from expression ${distributionExpression}`)
+    const distributionName = await this.runJabba('ls', [actualExpression])
 
     log.info(`Local name of distribution is: ${distributionName}`)
 
